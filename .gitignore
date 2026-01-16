@@ -1,0 +1,24 @@
+# Environment
+venv/
+env/
+.venv/
+
+# Bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# MCP config
+fde_sql_mcp.config.json
+
+# Tool dirs
+.mypy_cache/
+.pytest_cache/
+
+# Misc
+tmp/

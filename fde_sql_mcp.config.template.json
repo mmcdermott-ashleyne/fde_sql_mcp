@@ -1,0 +1,9 @@
+{
+  "sql_server": "your.sql.server.address",
+  "sql_server_port": 1433,
+  "sql_database": "master",
+  "sql_driver": "{ODBC Driver 17 for SQL Server}",
+  "sql_encrypt": true,
+  "sql_trust_server_certificate": true,
+  "sql_connection_timeout": 30
+}
