@@ -1,0 +1,18 @@
+[project]
+name = "fde-sql-mcp"
+version = "0.1.0"
+description = "FDE SQL Server MCP server (Windows auth)"
+requires-python = ">=3.10"
+dependencies = [
+  "mcp[cli]",
+  "pyodbc",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.mcp]
+name = "fde-sql-mcp"
+
+[tool.mcp.entrypoints]
+default = "fde_sql_mcp.server:run"

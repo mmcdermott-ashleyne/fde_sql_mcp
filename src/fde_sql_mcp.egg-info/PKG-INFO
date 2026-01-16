@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: fde-sql-mcp
+Version: 0.1.0
+Summary: FDE SQL Server MCP server (Windows auth)
+Requires-Python: >=3.10
+Requires-Dist: mcp[cli]
+Requires-Dist: pyodbc
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: ruff; extra == "dev"

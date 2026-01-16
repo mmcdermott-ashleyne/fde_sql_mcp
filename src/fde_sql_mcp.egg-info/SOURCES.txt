@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+src/fde_sql_mcp/__init__.py
+src/fde_sql_mcp/config.py
+src/fde_sql_mcp/server.py
+src/fde_sql_mcp.egg-info/PKG-INFO
+src/fde_sql_mcp.egg-info/SOURCES.txt
+src/fde_sql_mcp.egg-info/dependency_links.txt
+src/fde_sql_mcp.egg-info/requires.txt
+src/fde_sql_mcp.egg-info/top_level.txt
+src/fde_sql_mcp/clients/sql.py
+src/fde_sql_mcp/tools/databases.py
