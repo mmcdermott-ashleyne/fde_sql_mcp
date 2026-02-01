@@ -56,9 +56,14 @@ Create a local `fde_sql_mcp.config.json` file at the repo root (copy `fde_sql_mc
   "sql_server_port": 1433,
   "sql_database": "master",
   "sql_driver": "{ODBC Driver 17 for SQL Server}",
+  "sql_application_intent": "ReadOnly",
   "sql_encrypt": true,
   "sql_trust_server_certificate": true,
-  "sql_connection_timeout": 30
+  "sql_connection_timeout": 30,
+  "sql_query_timeout": 30,
+  "sql_max_rows": 200,
+  "sql_max_query_chars": 10000,
+  "sql_enforce_readonly": true
 }
 ```
 
@@ -69,9 +74,14 @@ SQL_SERVER_HOST=<required without local config>
 SQL_SERVER_PORT=            # optional
 SQL_SERVER_DATABASE=master
 SQL_DRIVER={ODBC Driver 17 for SQL Server}
+SQL_APPLICATION_INTENT=ReadOnly
 SQL_ENCRYPT=true
 SQL_TRUST_SERVER_CERTIFICATE=true
 SQL_CONNECTION_TIMEOUT=30
+SQL_QUERY_TIMEOUT=30
+SQL_MAX_ROWS=200
+SQL_MAX_QUERY_CHARS=10000
+SQL_ENFORCE_READONLY=true
 ```
 
 Notes:
@@ -137,6 +147,46 @@ Enumerates stored procedures in the provided database including creation metadat
 ### `list_indexes(database: str)`
 
 Enumerates non-null index definitions scoped to tables in the provided database (includes uniqueness, primary key flag, disabled state, and fill factor).
+
+### `run_readonly_query(database: str, query: str, max_rows: int | None)`
+
+Executes a validated read-only query (SELECT/CTE only) with a server-side row cap. The response includes rows, row_count, row_limit, and a truncated flag.
+
+### `list_table_columns(database: str, schema: str, table: str)`
+
+Returns column-level metadata for a table (types, nullability, identity/computed flags, defaults, collation).
+
+### `list_view_columns(database: str, schema: str, view: str)`
+
+Returns column-level metadata for a view.
+
+### `list_table_constraints(database: str, schema: str, table: str)`
+
+Returns primary key and unique constraints for the specified table.
+
+### `list_foreign_keys(database: str, schema: str, table: str)`
+
+Returns foreign key relationships for the specified table (including actions and referenced columns).
+
+### `list_index_details(database: str, schema: str, table: str)`
+
+Returns detailed index definitions for the specified table, including key/include columns and filters.
+
+### `list_view_definition(database: str, schema: str, view: str)`
+
+Returns the SQL definition of the specified view.
+
+### `list_stored_procedure_definition(database: str, schema: str, procedure: str)`
+
+Returns the SQL definition of the specified stored procedure.
+
+### `list_stored_procedure_parameters(database: str, schema: str, procedure: str)`
+
+Returns parameter metadata for the specified stored procedure.
+
+### `list_object_dependencies(database: str, schema: str, object_name: str)`
+
+Returns referenced objects for a view or stored procedure based on `sys.sql_expression_dependencies`.
 
 ---
 

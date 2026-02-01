@@ -87,6 +87,27 @@ def _get_sql_driver() -> str:
     )
 
 
+def _normalize_application_intent(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    if not normalized:
+        return None
+    if normalized.lower() in {"readonly", "read-only", "read_only"}:
+        return "ReadOnly"
+    if normalized.lower() in {"readwrite", "read-write", "read_write"}:
+        return "ReadWrite"
+    return normalized
+
+
+def _get_sql_application_intent() -> str | None:
+    if intent := _local_setting("sql_application_intent"):
+        return _normalize_application_intent(intent)
+    if env := os.getenv("SQL_APPLICATION_INTENT"):
+        return _normalize_application_intent(env)
+    return "ReadOnly"
+
+
 def _get_bool(local_name: str, env_name: str, default: bool) -> bool:
     value = _LOCAL_SETTINGS.get(local_name)
     if value is None:
@@ -116,6 +137,9 @@ class Settings:
     sql_server_port: str | None = field(default_factory=_get_sql_server_port)
     sql_database: str = field(default_factory=_get_sql_database)
     sql_driver: str = field(default_factory=_get_sql_driver)
+    sql_application_intent: str | None = field(
+        default_factory=_get_sql_application_intent
+    )
     sql_encrypt: bool = field(
         default_factory=lambda: _get_bool("sql_encrypt", "SQL_ENCRYPT", True)
     )
@@ -127,6 +151,24 @@ class Settings:
     sql_connection_timeout: int = field(
         default_factory=lambda: _get_int(
             "sql_connection_timeout", "SQL_CONNECTION_TIMEOUT", 30
+        )
+    )
+    sql_query_timeout: int = field(
+        default_factory=lambda: _get_int(
+            "sql_query_timeout", "SQL_QUERY_TIMEOUT", 30
+        )
+    )
+    sql_max_rows: int = field(
+        default_factory=lambda: _get_int("sql_max_rows", "SQL_MAX_ROWS", 200)
+    )
+    sql_max_query_chars: int = field(
+        default_factory=lambda: _get_int(
+            "sql_max_query_chars", "SQL_MAX_QUERY_CHARS", 10000
+        )
+    )
+    sql_enforce_readonly: bool = field(
+        default_factory=lambda: _get_bool(
+            "sql_enforce_readonly", "SQL_ENFORCE_READONLY", True
         )
     )
 

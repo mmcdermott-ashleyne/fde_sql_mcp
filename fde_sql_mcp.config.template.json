@@ -3,7 +3,12 @@
   "sql_server_port": 1433,
   "sql_database": "master",
   "sql_driver": "{ODBC Driver 17 for SQL Server}",
+  "sql_application_intent": "ReadOnly",
   "sql_encrypt": true,
   "sql_trust_server_certificate": true,
-  "sql_connection_timeout": 30
+  "sql_connection_timeout": 30,
+  "sql_query_timeout": 30,
+  "sql_max_rows": 200,
+  "sql_max_query_chars": 10000,
+  "sql_enforce_readonly": true
 }
