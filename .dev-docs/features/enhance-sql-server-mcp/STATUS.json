@@ -4,7 +4,7 @@
   "updated_at": "2026-02-01T20:26:46Z",
   "completed_at": "2026-02-01T20:26:46Z",
   "pr_url": "https://github.com/mmcdermott-ashleyne/fde_sql_mcp/pull/1",
-  "merge_commit": "f925a8d7cbeb575910298e1de2537a730ce97e80",
+  "merge_commit": "0927350345334ffbe96636a782464edc6c6304c7",
   "merge_method": "squash",
   "agent_id": "enhance-sql-server-mcp"
 }
