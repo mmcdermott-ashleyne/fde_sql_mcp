@@ -63,6 +63,8 @@ class SQLServerConnection:
             f"Connection Timeout={settings.sql_connection_timeout}",
             "Application Name=FDE SQL MCP",
         ]
+        if settings.sql_application_intent:
+            parts.append(f"ApplicationIntent={settings.sql_application_intent}")
         return ";".join(parts) + ";"
 
     def _conn_open(self) -> pyodbc.Connection:
