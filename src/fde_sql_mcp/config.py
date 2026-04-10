@@ -4,9 +4,11 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Sequence
 
 CONFIG_FILE_NAME = "fde_sql_mcp.config.json"
-_CONFIG_PATH = Path(__file__).resolve().parents[1] / CONFIG_FILE_NAME
+# config file lives at repository root, not inside src/
+_CONFIG_PATH = Path(__file__).resolve().parents[2] / CONFIG_FILE_NAME
 
 
 def _load_local_settings() -> dict[str, object]:
@@ -37,6 +39,10 @@ def _strip_or_none(value: object | None) -> str | None:
 
 def _local_setting(name: str) -> str | None:
     return _strip_or_none(_LOCAL_SETTINGS.get(name))
+
+
+def _local_setting_raw(name: str) -> object | None:
+    return _LOCAL_SETTINGS.get(name)
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -127,6 +133,72 @@ def _get_int(local_name: str, env_name: str, default: int) -> int:
         return _env_int(env_name, default)
 
 
+def _get_str(local_name: str, env_name: str) -> str | None:
+    if local := _local_setting(local_name):
+        return local
+    if env := os.getenv(env_name):
+        return _strip_or_none(env)
+    return None
+
+
+def _normalize_fabric_auth_mode(value: str | None) -> str:
+    if not value:
+        return "default_browser"
+    normalized = value.strip().lower().replace("-", "_")
+    if normalized in {"default", "default_auth", "default_browser"}:
+        return "default_browser"
+    if normalized in {"browser", "interactive", "browser_capable"}:
+        return "browser"
+    if normalized == "client_secret":
+        return "client_secret"
+    return normalized
+
+
+def _split_csv(value: str | None) -> tuple[str, ...]:
+    if not value:
+        return ()
+    parts = [part.strip() for part in value.split(",")]
+    return tuple(part for part in parts if part)
+
+
+def _normalize_string_list(
+    value: object | None,
+) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if isinstance(value, str):
+        return _split_csv(value)
+    if isinstance(value, Sequence) and not isinstance(value, (bytes, bytearray)):
+        normalized: list[str] = []
+        for item in value:
+            text = _strip_or_none(item)
+            if text:
+                normalized.append(text)
+        return tuple(normalized)
+    text = _strip_or_none(value)
+    return (text,) if text else ()
+
+
+def _get_string_list(local_name: str, env_name: str) -> tuple[str, ...]:
+    raw = _local_setting_raw(local_name)
+    if raw is not None:
+        values = _normalize_string_list(raw)
+        if values:
+            return values
+    return _split_csv(os.getenv(env_name))
+
+
+def _resolve_fabric_auth_mode(
+    tenant_id: str | None,
+    client_id: str | None,
+    client_secret: str | None,
+    fallback_mode: str,
+) -> str:
+    if tenant_id and client_id and client_secret:
+        return "client_secret"
+    return fallback_mode
+
+
 @dataclass(frozen=True)
 class Settings:
     """
@@ -171,6 +243,59 @@ class Settings:
             "sql_enforce_readonly", "SQL_ENFORCE_READONLY", True
         )
     )
+    fabric_enabled: bool = field(
+        default_factory=lambda: _get_bool(
+            "fabric_enabled", "FABRIC_ENABLED", False
+        )
+    )
+    fabric_tenant_id: str | None = field(
+        default_factory=lambda: _get_str("fabric_tenant_id", "FABRIC_TENANT_ID")
+    )
+    fabric_client_id: str | None = field(
+        default_factory=lambda: _get_str("fabric_client_id", "FABRIC_CLIENT_ID")
+    )
+    fabric_client_secret: str | None = field(
+        default_factory=lambda: _get_str(
+            "fabric_client_secret", "FABRIC_CLIENT_SECRET"
+        )
+    )
+    fabric_auth_fallback_mode: str = field(
+        default_factory=lambda: _normalize_fabric_auth_mode(
+            _get_str("fabric_auth_fallback_mode", "FABRIC_AUTH_FALLBACK_MODE")
+        )
+    )
+    fabric_default_workspace: str | None = field(
+        default_factory=lambda: _get_str(
+            "fabric_default_workspace", "FABRIC_DEFAULT_WORKSPACE"
+        )
+    )
+    fabric_default_database: str | None = field(
+        default_factory=lambda: _get_str(
+            "fabric_default_database", "FABRIC_DEFAULT_DATABASE"
+        )
+    )
+    fabric_allowed_workspaces: tuple[str, ...] = field(
+        default_factory=lambda: _get_string_list(
+            "fabric_allowed_workspaces", "FABRIC_ALLOWED_WORKSPACES"
+        )
+    )
+    fabric_allowed_databases: tuple[str, ...] = field(
+        default_factory=lambda: _get_string_list(
+            "fabric_allowed_databases", "FABRIC_ALLOWED_DATABASES"
+        )
+    )
+    fabric_auth_mode: str = field(init=False)
+    fabric_tenant_context: str | None = field(init=False)
+
+    def __post_init__(self) -> None:
+        mode = _resolve_fabric_auth_mode(
+            tenant_id=self.fabric_tenant_id,
+            client_id=self.fabric_client_id,
+            client_secret=self.fabric_client_secret,
+            fallback_mode=self.fabric_auth_fallback_mode,
+        )
+        object.__setattr__(self, "fabric_auth_mode", mode)
+        object.__setattr__(self, "fabric_tenant_context", self.fabric_tenant_id)
 
 
 settings = Settings()
