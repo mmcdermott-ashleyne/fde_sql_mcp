@@ -1,7 +1,7 @@
 ---
 phase: 3
 slug: fabric-sql-endpoint-parity
-status: in_progress
+status: complete
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-04-10
@@ -27,9 +27,9 @@ created: 2026-04-10
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 3-01-01 | 01 | 1 | FAB-02, FAB-03 | T-01 | Fabric workspace+endpoint+database resolve to configured SQL endpoint mapping only | unit | `.venv\Scripts\python -m pytest tests/test_target_routing.py -q -k "fabric and mapping"` | ✅ | ⬜ pending |
-| 3-01-02 | 01 | 1 | FAB-04, FAB-05 | T-02 | Read-only query and metadata paths execute through target-aware connection resolver | unit | `.venv\Scripts\python -m pytest tests/test_target_routing.py -q -k "run_readonly_query or metadata"` | ✅ | ⬜ pending |
-| 3-01-03 | 01 | 1 | SAFE-04 | T-03 | SQL-only MCP surface preserved; docs/config explain Fabric SQL-only behavior | integration | `.venv\Scripts\python -m pytest -q` | ✅ | ⬜ pending |
+| 3-01-01 | 01 | 1 | FAB-02, FAB-03 | T-01 | Fabric workspace+endpoint+database resolve to configured SQL endpoint mapping only | unit | `.venv\Scripts\python -m pytest tests/test_settings_fabric.py -q` | ✅ | ✅ passed |
+| 3-01-02 | 01 | 1 | FAB-04, FAB-05 | T-02 | Read-only query and metadata paths execute through target-aware connection resolver | unit | `.venv\Scripts\python -m pytest tests/test_target_routing.py -q -k "fabric or metadata or target_context"` | ✅ | ✅ passed |
+| 3-01-03 | 01 | 1 | SAFE-04 | T-03 | SQL-only MCP surface preserved; docs/config explain Fabric SQL-only behavior | integration | `.venv\Scripts\python -m pytest -q` | ✅ | ✅ passed |
 
 ## Threat Mapping
 
@@ -41,7 +41,7 @@ created: 2026-04-10
 
 ## Validation Sign-Off Checklist
 
-- [ ] All phase tasks have automated verification commands
-- [ ] Full suite passes
-- [ ] Requirement IDs FAB-02..05 and SAFE-04 mapped to tests/docs
-- [ ] `nyquist_compliant: true` remains set on completion
+- [x] All phase tasks have automated verification commands
+- [x] Full suite passes
+- [x] Requirement IDs FAB-02..05 and SAFE-04 mapped to tests/docs
+- [x] `nyquist_compliant: true` remains set on completion

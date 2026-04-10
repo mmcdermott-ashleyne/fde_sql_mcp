@@ -15,10 +15,10 @@
 ### Fabric SQL Endpoint Support
 
 - [x] **FAB-01**: User can list/select Fabric workspaces only from an allowlisted set (`fde_core_data_dev`, `fde_core_data_stg`, `fde_core_data_prod`) or mapped workspace IDs.
-- [ ] **FAB-02**: User can set/query Fabric Warehouse SQL endpoint targets for allowed `core_dw` database contexts.
-- [ ] **FAB-03**: User can set/query Fabric Lakehouse SQL endpoint targets for allowed `core_lh` database contexts.
-- [ ] **FAB-04**: User can execute read-only SQL queries against the selected Fabric endpoint using the same MCP SQL tool contract.
-- [ ] **FAB-05**: Existing metadata discovery tools continue to function with target-aware behavior (on-prem and Fabric where supported).
+- [x] **FAB-02**: User can set/query Fabric Warehouse SQL endpoint targets for allowed `core_dw` database contexts.
+- [x] **FAB-03**: User can set/query Fabric Lakehouse SQL endpoint targets for allowed `core_lh` database contexts.
+- [x] **FAB-04**: User can execute read-only SQL queries against the selected Fabric endpoint using the same MCP SQL tool contract.
+- [x] **FAB-05**: Existing metadata discovery tools continue to function with target-aware behavior (on-prem and Fabric where supported).
 
 ### Authentication
 
@@ -31,7 +31,7 @@
 - [ ] **SAFE-01**: Read-only SQL validation is enforced for both on-prem and Fabric execution paths.
 - [ ] **SAFE-02**: Query guardrails (max rows, max query characters, timeout) apply consistently across on-prem and Fabric targets.
 - [x] **SAFE-03**: Queries are rejected when resolved Fabric workspace/database targets are outside the allowlist.
-- [ ] **SAFE-04**: Scope remains SQL-only; no write operations or non-SQL Fabric operations are exposed by this MCP.
+- [x] **SAFE-04**: Scope remains SQL-only; no write operations or non-SQL Fabric operations are exposed by this MCP.
 
 ### Configuration and Developer UX
 
@@ -68,17 +68,17 @@
 | ROUTE-03 | Phase 2 | Complete |
 | ROUTE-04 | Phase 2 | Complete |
 | FAB-01 | Phase 2 | Complete |
-| FAB-02 | Phase 3 | Pending |
-| FAB-03 | Phase 3 | Pending |
-| FAB-04 | Phase 3 | Pending |
-| FAB-05 | Phase 3 | Pending |
+| FAB-02 | Phase 3 | Complete |
+| FAB-03 | Phase 3 | Complete |
+| FAB-04 | Phase 3 | Complete |
+| FAB-05 | Phase 3 | Complete |
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
 | SAFE-01 | Phase 4 | Pending |
 | SAFE-02 | Phase 4 | Pending |
 | SAFE-03 | Phase 2 | Complete |
-| SAFE-04 | Phase 3 | Pending |
+| SAFE-04 | Phase 3 | Complete |
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 2 | Complete |
 | CONF-03 | Phase 4 | Pending |

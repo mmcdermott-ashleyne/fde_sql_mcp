@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 2-01-PLAN.md
-last_updated: "2026-04-10T16:08:44.678Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-04-10T16:28:41.419Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 3
+  total_plans: 3
+  completed_plans: 3
   percent: 100
 ---
 
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** Users can query approved SQL data targets with one consistent, read-only MCP interface regardless of whether the data lives on-prem or in Fabric.
-**Current focus:** Phase 3 — Fabric SQL Endpoint Parity
+**Current focus:** Phase 4 — Safety Guardrails and Operator Docs
 
 ## Current Position
 
-Phase: 3
+Phase: 4
 Plan: Not started
-Status: Ready to execute
+Status: Ready to discuss/plan
 Last activity: 2026-04-10
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 2
-- Average duration: 0 min
-- Total execution time: 0.0 hours
+- Total plans completed: 3
+- Average duration: 9 min
+- Total execution time: 0.5 hours
 
 **By Phase:**
 
@@ -46,6 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 |-------|-------|-------|----------|
 | 1 | 1 | - | - |
 | 2 | 1 | - | - |
+| 3 | 1 | - | - |
 
 **Recent Trend:**
 
@@ -55,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 1 P1 | 4 | 3 tasks | 6 files |
 | Phase 2 P01 | 12m | 3 tasks | 8 files |
+| Phase 3 P1 | 15m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -72,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 2]: Routing is process-local state with explicit set/get tools and deterministic hint parsing.
 - [Phase 2]: Fabric target resolution fails closed for ambiguous or out-of-allowlist workspace/database input.
 - [Phase 2]: Existing SQL tools remain unchanged; target awareness is additive through routing tools and query context.
+- [Phase 3]: Fabric SQL endpoints are configured explicitly via fabric_sql_endpoint_map and never inferred implicitly.
+- [Phase 3]: Execution routing remains behind the existing MCP SQL tool contract; no Fabric-specific query tool fork.
+- [Phase 3]: Fabric execution fails closed on mapping gaps or database/endpoint mismatches.
 
 ### Pending Todos
 
@@ -83,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T16:08:44.635Z
-Stopped at: Completed 2-01-PLAN.md
+Last session: 2026-04-10T16:28:14.604Z
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
