@@ -25,6 +25,7 @@ _ENV_KEYS = [
     "FABRIC_AUTH_FALLBACK_MODE",
     "FABRIC_DEFAULT_WORKSPACE",
     "FABRIC_DEFAULT_DATABASE",
+    "FABRIC_WORKSPACE_ID_MAP",
     "FABRIC_ALLOWED_WORKSPACES",
     "FABRIC_ALLOWED_DATABASES",
 ]
@@ -111,12 +112,16 @@ def test_fabric_auth_mode_uses_default_fallback(monkeypatch) -> None:
 def test_fabric_allowlists_parse_from_local_and_env(monkeypatch) -> None:
     settings = _build_settings(
         monkeypatch,
-        local={"fabric_allowed_workspaces": ["dev", "stg"]},
+        local={
+            "fabric_allowed_workspaces": ["dev", "stg"],
+            "fabric_workspace_id_map": {"dev": "workspace-id-dev"},
+        },
         env={"FABRIC_ALLOWED_DATABASES": "core_dw, core_lh"},
     )
 
     assert settings.fabric_allowed_workspaces == ("dev", "stg")
     assert settings.fabric_allowed_databases == ("core_dw", "core_lh")
+    assert settings.fabric_workspace_id_map["dev"] == "workspace-id-dev"
 
 
 def test_auth_diagnostics_do_not_expose_secret_values(monkeypatch) -> None:

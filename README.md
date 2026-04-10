@@ -71,6 +71,11 @@ Create a local `fde_sql_mcp.config.json` file at the repo root (copy `fde_sql_mc
   "fabric_auth_fallback_mode": "default_browser",
   "fabric_default_workspace": "",
   "fabric_default_database": "",
+  "fabric_workspace_id_map": {
+    "fde_core_data_dev": "",
+    "fde_core_data_stg": "",
+    "fde_core_data_prod": ""
+  },
   "fabric_allowed_workspaces": ["fde_core_data_dev", "fde_core_data_stg", "fde_core_data_prod"],
   "fabric_allowed_databases": ["core_dw", "core_lh"]
 }
@@ -98,6 +103,7 @@ FABRIC_CLIENT_SECRET=
 FABRIC_AUTH_FALLBACK_MODE=default_browser
 FABRIC_DEFAULT_WORKSPACE=
 FABRIC_DEFAULT_DATABASE=
+FABRIC_WORKSPACE_ID_MAP=  # JSON object or comma pairs (workspace:id)
 FABRIC_ALLOWED_WORKSPACES=fde_core_data_dev,fde_core_data_stg,fde_core_data_prod
 FABRIC_ALLOWED_DATABASES=core_dw,core_lh
 ```
@@ -108,6 +114,7 @@ Notes:
 - Fabric auth mode precedence is deterministic:
   - `client_secret` mode when `FABRIC_TENANT_ID`, `FABRIC_CLIENT_ID`, and `FABRIC_CLIENT_SECRET` are all configured.
   - Fallback mode (`FABRIC_AUTH_FALLBACK_MODE`, default `default_browser`) when any client-secret value is missing.
+- Fabric workspace routing can map canonical workspace names to IDs using `fabric_workspace_id_map` / `FABRIC_WORKSPACE_ID_MAP`.
 
 ---
 
@@ -144,6 +151,28 @@ Returns non-secret Fabric authentication diagnostics:
 - resolved tenant context,
 - booleans indicating which Fabric auth inputs are configured.
 
+### `set_query_target(target: str)`
+
+Sets the active routing target for query execution using explicit or natural-language hints.
+
+Examples:
+- `onprem`
+- `fabric workspace=fde_core_data_dev endpoint=warehouse database=core_dw`
+- `query fabric prod lakehouse`
+
+### `get_query_target()`
+
+Returns the currently active routing target context:
+- environment,
+- workspace/workspace_id (for Fabric),
+- endpoint type,
+- database.
+
+### `list_fabric_workspaces()`
+
+Lists only allowlisted Fabric workspaces and configured workspace ID mappings.
+Out-of-allowlist workspaces are never returned.
+
 ### `list_databases()`
 
 Lists databases visible to the Windows-authenticated user.
@@ -179,7 +208,11 @@ Enumerates non-null index definitions scoped to tables in the provided database 
 
 ### `run_readonly_query(database: str, query: str, max_rows: int | None)`
 
-Executes a validated read-only query (SELECT/CTE only) with a server-side row cap. The response includes rows, row_count, row_limit, and a truncated flag.
+Executes a validated read-only query (SELECT/CTE only) with a server-side row cap. The response includes rows, row_count, row_limit, truncated flag, and `target_context`.
+
+Notes:
+- In Phase 2, active Fabric targets are validated/governed but query execution is still on-prem only.
+- If active target is Fabric, `run_readonly_query` returns a clear unsupported execution error until Phase 3 endpoint parity is implemented.
 
 ### `list_table_columns(database: str, schema: str, table: str)`
 

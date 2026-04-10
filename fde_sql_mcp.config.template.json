@@ -18,6 +18,11 @@
   "fabric_auth_fallback_mode": "default_browser",
   "fabric_default_workspace": "",
   "fabric_default_database": "",
+  "fabric_workspace_id_map": {
+    "fde_core_data_dev": "",
+    "fde_core_data_stg": "",
+    "fde_core_data_prod": ""
+  },
   "fabric_allowed_workspaces": ["fde_core_data_dev", "fde_core_data_stg", "fde_core_data_prod"],
   "fabric_allowed_databases": ["core_dw", "core_lh"]
 }
