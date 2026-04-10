@@ -63,31 +63,31 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ROUTE-01 | TBD | Pending |
-| ROUTE-02 | TBD | Pending |
-| ROUTE-03 | TBD | Pending |
-| ROUTE-04 | TBD | Pending |
-| FAB-01 | TBD | Pending |
-| FAB-02 | TBD | Pending |
-| FAB-03 | TBD | Pending |
-| FAB-04 | TBD | Pending |
-| FAB-05 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| SAFE-01 | TBD | Pending |
-| SAFE-02 | TBD | Pending |
-| SAFE-03 | TBD | Pending |
-| SAFE-04 | TBD | Pending |
-| CONF-01 | TBD | Pending |
-| CONF-02 | TBD | Pending |
-| CONF-03 | TBD | Pending |
+| ROUTE-01 | Phase 1 | Pending |
+| ROUTE-02 | Phase 2 | Pending |
+| ROUTE-03 | Phase 2 | Pending |
+| ROUTE-04 | Phase 2 | Pending |
+| FAB-01 | Phase 2 | Pending |
+| FAB-02 | Phase 3 | Pending |
+| FAB-03 | Phase 3 | Pending |
+| FAB-04 | Phase 3 | Pending |
+| FAB-05 | Phase 3 | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| SAFE-01 | Phase 4 | Pending |
+| SAFE-02 | Phase 4 | Pending |
+| SAFE-03 | Phase 2 | Pending |
+| SAFE-04 | Phase 3 | Pending |
+| CONF-01 | Phase 1 | Pending |
+| CONF-02 | Phase 2 | Pending |
+| CONF-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19 ⚠️
+- Mapped to phases: 19
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-10 after initial definition*
+*Last updated: 2026-04-10 after roadmap mapping*
