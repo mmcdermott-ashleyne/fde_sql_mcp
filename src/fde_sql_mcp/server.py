@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 from mcp.server.fastmcp import FastMCP
 
+from .tools import auth as AUTH
 from .tools import databases as DB
 
 # -----------------------------------------------------------------------------
@@ -20,6 +21,16 @@ mcp = FastMCP("FDE SQL MCP", json_response=True)
 @mcp.tool(description="Health check to verify the MCP server is running.")
 async def ping() -> str:
     return "pong"
+
+
+@mcp.tool(
+    description=(
+        "Return non-secret authentication diagnostics for this MCP server "
+        "(auth mode, credential source, and config presence)."
+    )
+)
+async def get_auth_info() -> Dict[str, Any]:
+    return await asyncio.to_thread(AUTH.get_auth_info_impl)
 
 
 # -----------------------------------------------------------------------------
