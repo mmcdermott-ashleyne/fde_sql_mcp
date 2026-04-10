@@ -188,6 +188,51 @@ def _get_string_list(local_name: str, env_name: str) -> tuple[str, ...]:
     return _split_csv(os.getenv(env_name))
 
 
+def _normalize_string_mapping(value: object | None) -> dict[str, str]:
+    if value is None:
+        return {}
+
+    if isinstance(value, dict):
+        normalized: dict[str, str] = {}
+        for key, mapped in value.items():
+            src = _strip_or_none(key)
+            dst = _strip_or_none(mapped)
+            if src and dst:
+                normalized[src] = dst
+        return normalized
+
+    if isinstance(value, str):
+        raw = value.strip()
+        if not raw:
+            return {}
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, dict):
+            return _normalize_string_mapping(parsed)
+
+        normalized: dict[str, str] = {}
+        for pair in raw.split(","):
+            if ":" not in pair:
+                continue
+            left, right = pair.split(":", 1)
+            src = _strip_or_none(left)
+            dst = _strip_or_none(right)
+            if src and dst:
+                normalized[src] = dst
+        return normalized
+
+    return {}
+
+
+def _get_string_mapping(local_name: str, env_name: str) -> dict[str, str]:
+    raw = _local_setting_raw(local_name)
+    if raw is not None:
+        return _normalize_string_mapping(raw)
+    return _normalize_string_mapping(os.getenv(env_name))
+
+
 def _resolve_fabric_auth_mode(
     tenant_id: str | None,
     client_id: str | None,
@@ -282,6 +327,11 @@ class Settings:
     fabric_allowed_databases: tuple[str, ...] = field(
         default_factory=lambda: _get_string_list(
             "fabric_allowed_databases", "FABRIC_ALLOWED_DATABASES"
+        )
+    )
+    fabric_workspace_id_map: dict[str, str] = field(
+        default_factory=lambda: _get_string_mapping(
+            "fabric_workspace_id_map", "FABRIC_WORKSPACE_ID_MAP"
         )
     )
     fabric_auth_mode: str = field(init=False)

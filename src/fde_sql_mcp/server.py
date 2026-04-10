@@ -8,6 +8,7 @@ from mcp.server.fastmcp import FastMCP
 
 from .tools import auth as AUTH
 from .tools import databases as DB
+from .tools import targeting as TARGET
 
 # -----------------------------------------------------------------------------
 # MCP Server Setup
@@ -31,6 +32,36 @@ async def ping() -> str:
 )
 async def get_auth_info() -> Dict[str, Any]:
     return await asyncio.to_thread(AUTH.get_auth_info_impl)
+
+
+@mcp.tool(
+    description=(
+        "Set active query target routing context using explicit or natural-language "
+        "hint text (onprem/fabric, workspace, endpoint type, database)."
+    )
+)
+async def set_query_target(target: str) -> Dict[str, Any]:
+    return await asyncio.to_thread(TARGET.set_query_target_impl, target)
+
+
+@mcp.tool(
+    description=(
+        "Return the currently active query target routing context "
+        "(environment/workspace/endpoint/database)."
+    )
+)
+async def get_query_target() -> Dict[str, Any]:
+    return await asyncio.to_thread(TARGET.get_query_target_impl)
+
+
+@mcp.tool(
+    description=(
+        "List Fabric workspaces available to routing, restricted to configured "
+        "allowlist names and mapped IDs."
+    )
+)
+async def list_fabric_workspaces() -> List[Dict[str, Any]]:
+    return await asyncio.to_thread(TARGET.list_fabric_workspaces_impl)
 
 
 # -----------------------------------------------------------------------------
