@@ -29,6 +29,7 @@ _ENV_KEYS = [
     "FABRIC_WORKSPACE_ID_MAP",
     "FABRIC_ALLOWED_WORKSPACES",
     "FABRIC_ALLOWED_DATABASES",
+    "FABRIC_SQL_ENDPOINT_MAP",
 ]
 
 
@@ -202,6 +203,15 @@ class _FakeSqlConnection:
         yield _FakeConnection()
 
 
+class _ConnectionRecorder:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def __call__(self, **kwargs):
+        self.calls.append(kwargs)
+        return _FakeSqlConnection()
+
+
 def test_run_readonly_query_includes_target_context(monkeypatch) -> None:
     settings = _build_settings(
         monkeypatch,
@@ -223,7 +233,7 @@ def test_run_readonly_query_includes_target_context(monkeypatch) -> None:
     assert result["target_context"]["endpoint_type"] == "sql_server"
 
 
-def test_run_readonly_query_fabric_execution_not_supported_until_phase_3(
+def test_run_readonly_query_executes_with_fabric_warehouse_target(
     monkeypatch,
 ) -> None:
     settings = _build_settings(
@@ -231,9 +241,61 @@ def test_run_readonly_query_fabric_execution_not_supported_until_phase_3(
         local={
             "fabric_allowed_workspaces": ["fde_core_data_dev"],
             "fabric_allowed_databases": ["core_dw"],
+            "fabric_sql_endpoint_map": {
+                "fde_core_data_dev": {
+                    "warehouse": {
+                        "server": "dev-warehouse.sql.fabric",
+                        "database": "core_dw",
+                        "user": "svc-user",
+                        "password": "svc-pass",
+                    }
+                }
+            },
         },
     )
     _configure_targeting(monkeypatch, settings)
+    recorder = _ConnectionRecorder()
+    monkeypatch.setattr(databases, "get_sql_connection", recorder)
+    targeting.set_query_target_impl(
+        "fabric workspace=fde_core_data_dev endpoint=warehouse database=core_dw"
+    )
+
+    result = databases.run_readonly_query_impl("core_dw", "SELECT 1")
+
+    assert result["target_context"]["environment"] == "fabric"
+    assert result["target_context"]["endpoint_type"] == "warehouse"
+    assert recorder.calls == [
+        {
+            "server": "dev-warehouse.sql.fabric",
+            "database": "core_dw",
+            "username": "svc-user",
+            "password": "svc-pass",
+        }
+    ]
+
+
+def test_run_readonly_query_rejects_database_mismatch_for_fabric(
+    monkeypatch,
+) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        local={
+            "fabric_allowed_workspaces": ["fde_core_data_dev"],
+            "fabric_allowed_databases": ["core_dw"],
+            "fabric_sql_endpoint_map": {
+                "fde_core_data_dev": {
+                    "warehouse": {
+                        "server": "dev-warehouse.sql.fabric",
+                        "database": "core_dw",
+                    }
+                }
+            },
+        },
+    )
+    _configure_targeting(monkeypatch, settings)
+    monkeypatch.setattr(
+        databases, "get_sql_connection", lambda **_kwargs: _FakeSqlConnection()
+    )
     targeting.set_query_target_impl(
         "fabric workspace=fde_core_data_dev endpoint=warehouse database=core_dw"
     )
@@ -241,10 +303,36 @@ def test_run_readonly_query_fabric_execution_not_supported_until_phase_3(
     try:
         databases.run_readonly_query_impl("master", "SELECT 1")
     except ValueError as exc:
-        message = str(exc)
-        assert "phase 3" in message.lower()
-        assert "fabric" in message.lower()
+        assert "to match" in str(exc).lower()
     else:
-        raise AssertionError(
-            "Expected ValueError when querying with fabric target before Phase 3"
-        )
+        raise AssertionError("Expected ValueError for Fabric database mismatch")
+
+
+def test_list_tables_uses_fabric_lakehouse_connection(monkeypatch) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        local={
+            "fabric_allowed_workspaces": ["fde_core_data_dev"],
+            "fabric_allowed_databases": ["core_lh"],
+            "fabric_sql_endpoint_map": {
+                "fde_core_data_dev": {
+                    "lakehouse": {
+                        "server": "dev-lakehouse.sql.fabric",
+                        "database": "core_lh",
+                    }
+                }
+            },
+        },
+    )
+    _configure_targeting(monkeypatch, settings)
+    recorder = _ConnectionRecorder()
+    monkeypatch.setattr(databases, "get_sql_connection", recorder)
+    targeting.set_query_target_impl(
+        "fabric workspace=fde_core_data_dev endpoint=lakehouse database=core_lh"
+    )
+
+    rows = databases.list_tables_impl("core_lh")
+
+    assert rows == [{"id": 1, "name": "alpha"}]
+    assert recorder.calls[0]["server"] == "dev-lakehouse.sql.fabric"
+    assert recorder.calls[0]["database"] == "core_lh"

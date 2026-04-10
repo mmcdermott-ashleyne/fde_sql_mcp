@@ -39,10 +39,14 @@ class SQLServerConnection:
         server: str,
         database: str,
         driver: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
         self.server = server
         self.database = database
         self.driver = driver or _resolve_driver(settings.sql_driver)
+        self.username = username
+        self.password = password
 
     def _build_conn_str(self) -> str:
         server = self.server
@@ -53,7 +57,6 @@ class SQLServerConnection:
             f"Driver={self.driver}",
             f"Server={server}",
             f"Database={self.database}",
-            "Trusted_Connection=yes",
             f"Encrypt={'yes' if settings.sql_encrypt else 'no'}",
             (
                 "TrustServerCertificate=yes"
@@ -63,6 +66,11 @@ class SQLServerConnection:
             f"Connection Timeout={settings.sql_connection_timeout}",
             "Application Name=FDE SQL MCP",
         ]
+        if self.username and self.password:
+            parts.append(f"Uid={self.username}")
+            parts.append(f"Pwd={self.password}")
+        else:
+            parts.append("Trusted_Connection=yes")
         if settings.sql_application_intent:
             parts.append(f"ApplicationIntent={settings.sql_application_intent}")
         return ";".join(parts) + ";"
@@ -83,5 +91,16 @@ class SQLServerConnection:
                 pass
 
 
-def get_sql_connection(*, server: str, database: str) -> SQLServerConnection:
-    return SQLServerConnection(server=server, database=database)
+def get_sql_connection(
+    *,
+    server: str,
+    database: str,
+    username: str | None = None,
+    password: str | None = None,
+) -> SQLServerConnection:
+    return SQLServerConnection(
+        server=server,
+        database=database,
+        username=username,
+        password=password,
+    )

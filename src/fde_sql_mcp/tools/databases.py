@@ -8,29 +8,119 @@ from ..config import settings
 from . import targeting as TARGET
 
 
-def _ensure_onprem_execution(target_context: Dict[str, Any]) -> None:
-    if target_context.get("environment") == "onprem":
-        return
+_FABRIC_DATABASE_BY_ENDPOINT = {
+    "warehouse": "core_dw",
+    "lakehouse": "core_lh",
+}
 
-    workspace = target_context.get("workspace")
-    endpoint_type = target_context.get("endpoint_type")
-    database = target_context.get("database")
+
+def _fabric_connection_params(
+    target_context: Dict[str, Any], requested_database: str
+) -> Dict[str, str | None]:
+    workspace = str(target_context.get("workspace") or "").strip()
+    endpoint_type = str(target_context.get("endpoint_type") or "").strip().lower()
+    routed_database = str(target_context.get("database") or "").strip()
+    requested_database_clean = str(requested_database or "").strip()
+
+    if not workspace:
+        raise ValueError("Fabric target is missing workspace context.")
+    if endpoint_type not in _FABRIC_DATABASE_BY_ENDPOINT:
+        raise ValueError(
+            f"Unsupported Fabric endpoint type `{endpoint_type}` for SQL execution."
+        )
+    if not routed_database:
+        raise ValueError("Fabric target is missing routed database context.")
+
+    expected_database = _FABRIC_DATABASE_BY_ENDPOINT[endpoint_type]
+    if routed_database.lower() != expected_database:
+        raise ValueError(
+            f"Fabric endpoint `{endpoint_type}` is incompatible with routed "
+            f"database `{routed_database}`. Expected `{expected_database}`."
+        )
+
+    if requested_database_clean and (
+        requested_database_clean.lower() != routed_database.lower()
+    ):
+        raise ValueError(
+            "Fabric execution requires the tool `database` argument to match "
+            f"the routed target database `{routed_database}`."
+        )
+
+    workspace_map = settings.fabric_sql_endpoint_map.get(workspace.lower())
+    if not workspace_map:
+        raise ValueError(
+            "No Fabric SQL endpoint mapping found for workspace "
+            f"`{workspace}` in `fabric_sql_endpoint_map`."
+        )
+
+    endpoint_map = workspace_map.get(endpoint_type)
+    if not endpoint_map:
+        raise ValueError(
+            "No Fabric SQL endpoint mapping found for "
+            f"`{workspace}` endpoint `{endpoint_type}`."
+        )
+
+    mapped_database = str(endpoint_map.get("database") or "").strip()
+    mapped_server = str(endpoint_map.get("server") or "").strip()
+    if not mapped_server or not mapped_database:
+        raise ValueError(
+            "Fabric SQL endpoint mapping requires non-empty `server` and `database`."
+        )
+    if mapped_database.lower() != routed_database.lower():
+        raise ValueError(
+            f"Fabric SQL endpoint mapping database `{mapped_database}` does not "
+            f"match routed database `{routed_database}`."
+        )
+
+    return {
+        "server": mapped_server,
+        "database": mapped_database,
+        "username": endpoint_map.get("user"),
+        "password": endpoint_map.get("password"),
+    }
+
+
+def _resolve_execution_target(
+    requested_database: str,
+) -> tuple[Dict[str, Any], Dict[str, str | None]]:
+    target_context = TARGET.get_query_target_impl()
+    environment = str(target_context.get("environment") or "").lower()
+    if environment == "onprem":
+        return target_context, {
+            "server": settings.sql_server,
+            "database": requested_database,
+            "username": None,
+            "password": None,
+        }
+    if environment == "fabric":
+        return target_context, _fabric_connection_params(
+            target_context, requested_database
+        )
+
     raise ValueError(
-        "Fabric SQL query execution is not enabled in Phase 2. "
-        "Use onprem target for query execution until Phase 3 enables Fabric SQL endpoints. "
-        f"(workspace={workspace}, endpoint_type={endpoint_type}, database={database})"
+        f"Unsupported execution environment `{target_context.get('environment')}`."
     )
+
+
+def _default_database_for_list_databases() -> str:
+    target_context = TARGET.get_query_target_impl()
+    if target_context.get("environment") == "fabric":
+        routed_database = str(target_context.get("database") or "").strip()
+        if routed_database:
+            return routed_database
+    return settings.sql_database
 
 
 def _fetch_rows(
     database: str, query: str, params: Sequence[Any] | None = None
 ) -> List[Dict[str, Any]]:
     """Run the provided query against *database* and return rows as dicts."""
-    target_context = TARGET.get_query_target_impl()
-    _ensure_onprem_execution(target_context)
+    _, connection_target = _resolve_execution_target(database)
     conn = get_sql_connection(
-        server=settings.sql_server,
-        database=database,
+        server=str(connection_target["server"]),
+        database=str(connection_target["database"]),
+        username=connection_target["username"],
+        password=connection_target["password"],
     )
     with conn.get_connection() as connection:
         cursor = connection.cursor()
@@ -141,11 +231,12 @@ def run_readonly_query_impl(
 ) -> Dict[str, Any]:
     """Execute a validated, read-only query with row limits enforced."""
     _validate_readonly_query(query)
-    target_context = TARGET.get_query_target_impl()
-    _ensure_onprem_execution(target_context)
+    target_context, connection_target = _resolve_execution_target(database)
     conn = get_sql_connection(
-        server=settings.sql_server,
-        database=database,
+        server=str(connection_target["server"]),
+        database=str(connection_target["database"]),
+        username=connection_target["username"],
+        password=connection_target["password"],
     )
     limit = _normalize_max_rows(max_rows)
     with conn.get_connection() as connection:
@@ -170,7 +261,7 @@ def run_readonly_query_impl(
 def list_databases_impl() -> List[Dict[str, Any]]:
     """List every database visible to the configured server user."""
     return _fetch_rows(
-        settings.sql_database,
+        _default_database_for_list_databases(),
         (
             "SELECT name, database_id, state_desc, recovery_model_desc "
             "FROM sys.databases "
