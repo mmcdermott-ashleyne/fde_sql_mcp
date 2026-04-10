@@ -76,6 +76,22 @@ Create a local `fde_sql_mcp.config.json` file at the repo root (copy `fde_sql_mc
     "fde_core_data_stg": "",
     "fde_core_data_prod": ""
   },
+  "fabric_sql_endpoint_map": {
+    "fde_core_data_dev": {
+      "warehouse": {
+        "server": "dev-warehouse.sql.fabric.microsoft.com",
+        "database": "core_dw",
+        "user": "",
+        "password": ""
+      },
+      "lakehouse": {
+        "server": "dev-lakehouse.sql.fabric.microsoft.com",
+        "database": "core_lh",
+        "user": "",
+        "password": ""
+      }
+    }
+  },
   "fabric_allowed_workspaces": ["fde_core_data_dev", "fde_core_data_stg", "fde_core_data_prod"],
   "fabric_allowed_databases": ["core_dw", "core_lh"]
 }
@@ -104,17 +120,22 @@ FABRIC_AUTH_FALLBACK_MODE=default_browser
 FABRIC_DEFAULT_WORKSPACE=
 FABRIC_DEFAULT_DATABASE=
 FABRIC_WORKSPACE_ID_MAP=  # JSON object or comma pairs (workspace:id)
+FABRIC_SQL_ENDPOINT_MAP=  # JSON object keyed by workspace with warehouse/lakehouse server+database (+ optional user/password)
 FABRIC_ALLOWED_WORKSPACES=fde_core_data_dev,fde_core_data_stg,fde_core_data_prod
 FABRIC_ALLOWED_DATABASES=core_dw,core_lh
 ```
 
 Notes:
-- Windows auth is always used (`Trusted_Connection=yes`).
+- On-prem SQL uses Windows auth (`Trusted_Connection=yes`).
+- Fabric SQL endpoint auth is derived from `fabric_sql_endpoint_map`:
+  - if `user` and `password` are provided, SQL auth is used;
+  - if omitted, Windows auth is attempted (useful for dev/test environments with delegated access).
 - `SQL_TRUST_SERVER_CERTIFICATE=true` matches your trusted cert requirement.
 - Fabric auth mode precedence is deterministic:
   - `client_secret` mode when `FABRIC_TENANT_ID`, `FABRIC_CLIENT_ID`, and `FABRIC_CLIENT_SECRET` are all configured.
   - Fallback mode (`FABRIC_AUTH_FALLBACK_MODE`, default `default_browser`) when any client-secret value is missing.
 - Fabric workspace routing can map canonical workspace names to IDs using `fabric_workspace_id_map` / `FABRIC_WORKSPACE_ID_MAP`.
+- Fabric endpoint execution requires `fabric_sql_endpoint_map` / `FABRIC_SQL_ENDPOINT_MAP` entries for each allowlisted workspace + endpoint pair you route to.
 
 ---
 
@@ -211,8 +232,8 @@ Enumerates non-null index definitions scoped to tables in the provided database 
 Executes a validated read-only query (SELECT/CTE only) with a server-side row cap. The response includes rows, row_count, row_limit, truncated flag, and `target_context`.
 
 Notes:
-- In Phase 2, active Fabric targets are validated/governed but query execution is still on-prem only.
-- If active target is Fabric, `run_readonly_query` returns a clear unsupported execution error until Phase 3 endpoint parity is implemented.
+- Active Fabric targets execute against configured Fabric SQL endpoint mappings while preserving the same read-only contract.
+- `target_context` always reflects the resolved active routing target used for execution.
 
 ### `list_table_columns(database: str, schema: str, table: str)`
 

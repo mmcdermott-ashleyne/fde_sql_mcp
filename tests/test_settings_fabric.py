@@ -28,6 +28,7 @@ _ENV_KEYS = [
     "FABRIC_WORKSPACE_ID_MAP",
     "FABRIC_ALLOWED_WORKSPACES",
     "FABRIC_ALLOWED_DATABASES",
+    "FABRIC_SQL_ENDPOINT_MAP",
 ]
 
 
@@ -144,3 +145,79 @@ def test_auth_diagnostics_do_not_expose_secret_values(monkeypatch) -> None:
     assert info["credential_source"] == "fabric_client_secret"
     assert info["configured_inputs"]["fabric_client_secret"] is True
     assert "super-secret-value" not in payload
+
+
+def test_fabric_sql_endpoint_map_parses_from_local(monkeypatch) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        local={
+            "fabric_sql_endpoint_map": {
+                "FDE_CORE_DATA_DEV": {
+                    "warehouse": {
+                        "server": "dev-warehouse.sql.fabric",
+                        "database": "core_dw",
+                        "user": "svc-user",
+                        "password": "svc-pass",
+                    },
+                    "lakehouse": {
+                        "server": "dev-lakehouse.sql.fabric",
+                        "database": "core_lh",
+                    },
+                }
+            }
+        },
+    )
+
+    parsed = settings.fabric_sql_endpoint_map
+    assert "fde_core_data_dev" in parsed
+    assert parsed["fde_core_data_dev"]["warehouse"]["database"] == "core_dw"
+    assert parsed["fde_core_data_dev"]["warehouse"]["user"] == "svc-user"
+    assert parsed["fde_core_data_dev"]["lakehouse"]["database"] == "core_lh"
+
+
+def test_fabric_sql_endpoint_map_parses_from_env_json(monkeypatch) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        env={
+            "FABRIC_SQL_ENDPOINT_MAP": json.dumps(
+                {
+                    "fde_core_data_prod": {
+                        "warehouse": {
+                            "server": "prod-warehouse.sql.fabric",
+                            "database": "core_dw",
+                        }
+                    }
+                }
+            )
+        },
+    )
+
+    assert settings.fabric_sql_endpoint_map["fde_core_data_prod"]["warehouse"][
+        "server"
+    ] == "prod-warehouse.sql.fabric"
+
+
+def test_fabric_sql_endpoint_map_ignores_invalid_entries(monkeypatch) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        local={
+            "fabric_sql_endpoint_map": {
+                "fde_core_data_stg": {
+                    "warehouse": {"server": "stg-warehouse.sql.fabric"},
+                    "spark": {
+                        "server": "ignored.sql.fabric",
+                        "database": "core_dw",
+                    },
+                    "lakehouse": {
+                        "server": "stg-lakehouse.sql.fabric",
+                        "database": "core_lh",
+                    },
+                }
+            }
+        },
+    )
+
+    parsed = settings.fabric_sql_endpoint_map["fde_core_data_stg"]
+    assert "warehouse" not in parsed
+    assert "spark" not in parsed
+    assert parsed["lakehouse"]["database"] == "core_lh"

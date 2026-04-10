@@ -226,11 +226,79 @@ def _normalize_string_mapping(value: object | None) -> dict[str, str]:
     return {}
 
 
+def _normalize_fabric_sql_endpoint_map(
+    value: object | None,
+) -> dict[str, dict[str, dict[str, str]]]:
+    if value is None:
+        return {}
+
+    parsed: object = value
+    if isinstance(value, str):
+        raw = value.strip()
+        if not raw:
+            return {}
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+
+    if not isinstance(parsed, dict):
+        return {}
+
+    normalized: dict[str, dict[str, dict[str, str]]] = {}
+    for workspace_key, endpoint_map in parsed.items():
+        workspace = _strip_or_none(workspace_key)
+        if not workspace or not isinstance(endpoint_map, dict):
+            continue
+
+        endpoint_entries: dict[str, dict[str, str]] = {}
+        for endpoint_key, endpoint_value in endpoint_map.items():
+            endpoint = _strip_or_none(endpoint_key)
+            if not endpoint or not isinstance(endpoint_value, dict):
+                continue
+
+            endpoint_name = endpoint.lower()
+            if endpoint_name not in {"warehouse", "lakehouse"}:
+                continue
+
+            server = _strip_or_none(endpoint_value.get("server"))
+            database = _strip_or_none(endpoint_value.get("database"))
+            if not server or not database:
+                continue
+
+            normalized_endpoint: dict[str, str] = {
+                "server": server,
+                "database": database,
+            }
+            user = _strip_or_none(endpoint_value.get("user"))
+            password = _strip_or_none(endpoint_value.get("password"))
+            if user:
+                normalized_endpoint["user"] = user
+            if password:
+                normalized_endpoint["password"] = password
+
+            endpoint_entries[endpoint_name] = normalized_endpoint
+
+        if endpoint_entries:
+            normalized[workspace.lower()] = endpoint_entries
+
+    return normalized
+
+
 def _get_string_mapping(local_name: str, env_name: str) -> dict[str, str]:
     raw = _local_setting_raw(local_name)
     if raw is not None:
         return _normalize_string_mapping(raw)
     return _normalize_string_mapping(os.getenv(env_name))
+
+
+def _get_fabric_sql_endpoint_map(
+    local_name: str, env_name: str
+) -> dict[str, dict[str, dict[str, str]]]:
+    raw = _local_setting_raw(local_name)
+    if raw is not None:
+        return _normalize_fabric_sql_endpoint_map(raw)
+    return _normalize_fabric_sql_endpoint_map(os.getenv(env_name))
 
 
 def _resolve_fabric_auth_mode(
@@ -332,6 +400,11 @@ class Settings:
     fabric_workspace_id_map: dict[str, str] = field(
         default_factory=lambda: _get_string_mapping(
             "fabric_workspace_id_map", "FABRIC_WORKSPACE_ID_MAP"
+        )
+    )
+    fabric_sql_endpoint_map: dict[str, dict[str, dict[str, str]]] = field(
+        default_factory=lambda: _get_fabric_sql_endpoint_map(
+            "fabric_sql_endpoint_map", "FABRIC_SQL_ENDPOINT_MAP"
         )
     )
     fabric_auth_mode: str = field(init=False)

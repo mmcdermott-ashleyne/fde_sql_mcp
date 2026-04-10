@@ -23,6 +23,50 @@
     "fde_core_data_stg": "",
     "fde_core_data_prod": ""
   },
+  "fabric_sql_endpoint_map": {
+    "fde_core_data_dev": {
+      "warehouse": {
+        "server": "dev-warehouse.sql.fabric.microsoft.com",
+        "database": "core_dw",
+        "user": "",
+        "password": ""
+      },
+      "lakehouse": {
+        "server": "dev-lakehouse.sql.fabric.microsoft.com",
+        "database": "core_lh",
+        "user": "",
+        "password": ""
+      }
+    },
+    "fde_core_data_stg": {
+      "warehouse": {
+        "server": "stg-warehouse.sql.fabric.microsoft.com",
+        "database": "core_dw",
+        "user": "",
+        "password": ""
+      },
+      "lakehouse": {
+        "server": "stg-lakehouse.sql.fabric.microsoft.com",
+        "database": "core_lh",
+        "user": "",
+        "password": ""
+      }
+    },
+    "fde_core_data_prod": {
+      "warehouse": {
+        "server": "prod-warehouse.sql.fabric.microsoft.com",
+        "database": "core_dw",
+        "user": "",
+        "password": ""
+      },
+      "lakehouse": {
+        "server": "prod-lakehouse.sql.fabric.microsoft.com",
+        "database": "core_lh",
+        "user": "",
+        "password": ""
+      }
+    }
+  },
   "fabric_allowed_workspaces": ["fde_core_data_dev", "fde_core_data_stg", "fde_core_data_prod"],
   "fabric_allowed_databases": ["core_dw", "core_lh"]
 }
