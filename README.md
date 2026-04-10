@@ -196,7 +196,11 @@ Out-of-allowlist workspaces are never returned.
 
 ### `list_databases()`
 
-Lists databases visible to the Windows-authenticated user.
+Lists databases visible to the currently routed SQL target.
+
+Notes:
+- On-prem target: uses configured SQL Server (`Trusted_Connection`).
+- Fabric target: uses routed Fabric endpoint/database mapping from `fabric_sql_endpoint_map`.
 
 Example response:
 
@@ -214,6 +218,9 @@ Example response:
 ### `list_tables(database: str)`
 
 Enumerates tables in the provided database with schema name, creation/modify timestamps, and temporal type metadata.
+
+Notes:
+- For Fabric targets, `database` must match the routed target database (`core_dw` for warehouse, `core_lh` for lakehouse).
 
 ### `list_views(database: str)`
 

@@ -336,3 +336,54 @@ def test_list_tables_uses_fabric_lakehouse_connection(monkeypatch) -> None:
     assert rows == [{"id": 1, "name": "alpha"}]
     assert recorder.calls[0]["server"] == "dev-lakehouse.sql.fabric"
     assert recorder.calls[0]["database"] == "core_lh"
+
+
+def test_list_databases_uses_routed_fabric_database(monkeypatch) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        local={
+            "sql_database": "master",
+            "fabric_allowed_workspaces": ["fde_core_data_dev"],
+            "fabric_allowed_databases": ["core_lh"],
+            "fabric_sql_endpoint_map": {
+                "fde_core_data_dev": {
+                    "lakehouse": {
+                        "server": "dev-lakehouse.sql.fabric",
+                        "database": "core_lh",
+                    }
+                }
+            },
+        },
+    )
+    _configure_targeting(monkeypatch, settings)
+    recorder = _ConnectionRecorder()
+    monkeypatch.setattr(databases, "get_sql_connection", recorder)
+    targeting.set_query_target_impl(
+        "fabric workspace=fde_core_data_dev endpoint=lakehouse database=core_lh"
+    )
+
+    rows = databases.list_databases_impl()
+
+    assert rows == [{"id": 1, "name": "alpha"}]
+    assert recorder.calls[0]["database"] == "core_lh"
+
+
+def test_run_readonly_query_fails_when_fabric_mapping_missing(monkeypatch) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        local={
+            "fabric_allowed_workspaces": ["fde_core_data_dev"],
+            "fabric_allowed_databases": ["core_dw"],
+        },
+    )
+    _configure_targeting(monkeypatch, settings)
+    targeting.set_query_target_impl(
+        "fabric workspace=fde_core_data_dev endpoint=warehouse database=core_dw"
+    )
+
+    try:
+        databases.run_readonly_query_impl("core_dw", "SELECT 1")
+    except ValueError as exc:
+        assert "endpoint mapping" in str(exc).lower()
+    else:
+        raise AssertionError("Expected ValueError for missing Fabric endpoint mapping")
