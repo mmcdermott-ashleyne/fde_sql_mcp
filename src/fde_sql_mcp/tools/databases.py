@@ -17,7 +17,11 @@ def _fetch_rows(
     )
     with conn.get_connection() as connection:
         cursor = connection.cursor()
-        cursor.timeout = settings.sql_query_timeout
+        try:
+            cursor.timeout = settings.sql_query_timeout
+        except AttributeError:
+            # Some pyodbc builds don't expose cursor.timeout; ignore.
+            pass
         cursor.execute(query, params or ())
         columns = [column[0] for column in cursor.description]
         return [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -127,7 +131,11 @@ def run_readonly_query_impl(
     limit = _normalize_max_rows(max_rows)
     with conn.get_connection() as connection:
         cursor = connection.cursor()
-        cursor.timeout = settings.sql_query_timeout
+        try:
+            cursor.timeout = settings.sql_query_timeout
+        except AttributeError:
+            # Some pyodbc builds don't expose cursor.timeout; ignore.
+            pass
         cursor.execute(f"SET NOCOUNT ON; SET ROWCOUNT {limit}; {query}")
         columns = [column[0] for column in cursor.description or []]
         rows = cursor.fetchall()

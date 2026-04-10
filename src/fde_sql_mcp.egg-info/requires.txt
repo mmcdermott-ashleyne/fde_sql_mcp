@@ -1,6 +1,0 @@
-mcp[cli]
-pyodbc
-
-[dev]
-pytest
-ruff
