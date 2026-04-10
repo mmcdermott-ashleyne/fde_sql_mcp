@@ -63,7 +63,16 @@ Create a local `fde_sql_mcp.config.json` file at the repo root (copy `fde_sql_mc
   "sql_query_timeout": 30,
   "sql_max_rows": 200,
   "sql_max_query_chars": 10000,
-  "sql_enforce_readonly": true
+  "sql_enforce_readonly": true,
+  "fabric_enabled": false,
+  "fabric_tenant_id": "",
+  "fabric_client_id": "",
+  "fabric_client_secret": "",
+  "fabric_auth_fallback_mode": "default_browser",
+  "fabric_default_workspace": "",
+  "fabric_default_database": "",
+  "fabric_allowed_workspaces": ["fde_core_data_dev", "fde_core_data_stg", "fde_core_data_prod"],
+  "fabric_allowed_databases": ["core_dw", "core_lh"]
 }
 ```
 
@@ -82,11 +91,23 @@ SQL_QUERY_TIMEOUT=30
 SQL_MAX_ROWS=200
 SQL_MAX_QUERY_CHARS=10000
 SQL_ENFORCE_READONLY=true
+FABRIC_ENABLED=false
+FABRIC_TENANT_ID=
+FABRIC_CLIENT_ID=
+FABRIC_CLIENT_SECRET=
+FABRIC_AUTH_FALLBACK_MODE=default_browser
+FABRIC_DEFAULT_WORKSPACE=
+FABRIC_DEFAULT_DATABASE=
+FABRIC_ALLOWED_WORKSPACES=fde_core_data_dev,fde_core_data_stg,fde_core_data_prod
+FABRIC_ALLOWED_DATABASES=core_dw,core_lh
 ```
 
 Notes:
 - Windows auth is always used (`Trusted_Connection=yes`).
 - `SQL_TRUST_SERVER_CERTIFICATE=true` matches your trusted cert requirement.
+- Fabric auth mode precedence is deterministic:
+  - `client_secret` mode when `FABRIC_TENANT_ID`, `FABRIC_CLIENT_ID`, and `FABRIC_CLIENT_SECRET` are all configured.
+  - Fallback mode (`FABRIC_AUTH_FALLBACK_MODE`, default `default_browser`) when any client-secret value is missing.
 
 ---
 
@@ -114,6 +135,14 @@ python -m fde_sql_mcp.server
 ---
 
 ## Tools
+
+### `get_auth_info()`
+
+Returns non-secret Fabric authentication diagnostics:
+- resolved auth mode (`client_secret`, `default_browser`, or configured fallback),
+- credential source,
+- resolved tenant context,
+- booleans indicating which Fabric auth inputs are configured.
 
 ### `list_databases()`
 

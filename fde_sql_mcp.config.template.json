@@ -10,5 +10,14 @@
   "sql_query_timeout": 30,
   "sql_max_rows": 200,
   "sql_max_query_chars": 10000,
-  "sql_enforce_readonly": true
+  "sql_enforce_readonly": true,
+  "fabric_enabled": false,
+  "fabric_tenant_id": "",
+  "fabric_client_id": "",
+  "fabric_client_secret": "",
+  "fabric_auth_fallback_mode": "default_browser",
+  "fabric_default_workspace": "",
+  "fabric_default_database": "",
+  "fabric_allowed_workspaces": ["fde_core_data_dev", "fde_core_data_stg", "fde_core_data_prod"],
+  "fabric_allowed_databases": ["core_dw", "core_lh"]
 }
