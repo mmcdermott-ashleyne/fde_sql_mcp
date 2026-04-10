@@ -8,13 +8,13 @@
 ### Routing and Target Selection
 
 - [x] **ROUTE-01**: User can run the existing read-only SQL tools against on-prem SQL Server without changing current prompt patterns.
-- [ ] **ROUTE-02**: User can explicitly switch active query environment between `onprem` and `fabric`.
-- [ ] **ROUTE-03**: User can target Fabric environment through natural language (for example, "query fabric prod lakehouse for y") and the server resolves a deterministic target.
-- [ ] **ROUTE-04**: Query responses include resolved target context (environment, workspace, endpoint type, database) so users can verify where queries ran.
+- [x] **ROUTE-02**: User can explicitly switch active query environment between `onprem` and `fabric`.
+- [x] **ROUTE-03**: User can target Fabric environment through natural language (for example, "query fabric prod lakehouse for y") and the server resolves a deterministic target.
+- [x] **ROUTE-04**: Query responses include resolved target context (environment, workspace, endpoint type, database) so users can verify where queries ran.
 
 ### Fabric SQL Endpoint Support
 
-- [ ] **FAB-01**: User can list/select Fabric workspaces only from an allowlisted set (`fde_core_data_dev`, `fde_core_data_stg`, `fde_core_data_prod`) or mapped workspace IDs.
+- [x] **FAB-01**: User can list/select Fabric workspaces only from an allowlisted set (`fde_core_data_dev`, `fde_core_data_stg`, `fde_core_data_prod`) or mapped workspace IDs.
 - [ ] **FAB-02**: User can set/query Fabric Warehouse SQL endpoint targets for allowed `core_dw` database contexts.
 - [ ] **FAB-03**: User can set/query Fabric Lakehouse SQL endpoint targets for allowed `core_lh` database contexts.
 - [ ] **FAB-04**: User can execute read-only SQL queries against the selected Fabric endpoint using the same MCP SQL tool contract.
@@ -30,13 +30,13 @@
 
 - [ ] **SAFE-01**: Read-only SQL validation is enforced for both on-prem and Fabric execution paths.
 - [ ] **SAFE-02**: Query guardrails (max rows, max query characters, timeout) apply consistently across on-prem and Fabric targets.
-- [ ] **SAFE-03**: Queries are rejected when resolved Fabric workspace/database targets are outside the allowlist.
+- [x] **SAFE-03**: Queries are rejected when resolved Fabric workspace/database targets are outside the allowlist.
 - [ ] **SAFE-04**: Scope remains SQL-only; no write operations or non-SQL Fabric operations are exposed by this MCP.
 
 ### Configuration and Developer UX
 
 - [x] **CONF-01**: Configuration supports both on-prem SQL settings and Fabric settings in one project config model.
-- [ ] **CONF-02**: Tool descriptions remain mostly unchanged while implementation becomes environment-aware to minimize prompt/token overhead.
+- [x] **CONF-02**: Tool descriptions remain mostly unchanged while implementation becomes environment-aware to minimize prompt/token overhead.
 - [ ] **CONF-03**: Documentation explains dual-environment setup, auth precedence, and examples for both explicit and natural-language targeting.
 
 ## v2 Requirements
@@ -64,10 +64,10 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ROUTE-01 | Phase 1 | Complete |
-| ROUTE-02 | Phase 2 | Pending |
-| ROUTE-03 | Phase 2 | Pending |
-| ROUTE-04 | Phase 2 | Pending |
-| FAB-01 | Phase 2 | Pending |
+| ROUTE-02 | Phase 2 | Complete |
+| ROUTE-03 | Phase 2 | Complete |
+| ROUTE-04 | Phase 2 | Complete |
+| FAB-01 | Phase 2 | Complete |
 | FAB-02 | Phase 3 | Pending |
 | FAB-03 | Phase 3 | Pending |
 | FAB-04 | Phase 3 | Pending |
@@ -77,10 +77,10 @@
 | AUTH-03 | Phase 1 | Complete |
 | SAFE-01 | Phase 4 | Pending |
 | SAFE-02 | Phase 4 | Pending |
-| SAFE-03 | Phase 2 | Pending |
+| SAFE-03 | Phase 2 | Complete |
 | SAFE-04 | Phase 3 | Pending |
 | CONF-01 | Phase 1 | Complete |
-| CONF-02 | Phase 2 | Pending |
+| CONF-02 | Phase 2 | Complete |
 | CONF-03 | Phase 4 | Pending |
 
 **Coverage:**
