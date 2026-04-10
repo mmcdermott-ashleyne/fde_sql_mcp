@@ -7,7 +7,7 @@
 
 ### Routing and Target Selection
 
-- [ ] **ROUTE-01**: User can run the existing read-only SQL tools against on-prem SQL Server without changing current prompt patterns.
+- [x] **ROUTE-01**: User can run the existing read-only SQL tools against on-prem SQL Server without changing current prompt patterns.
 - [ ] **ROUTE-02**: User can explicitly switch active query environment between `onprem` and `fabric`.
 - [ ] **ROUTE-03**: User can target Fabric environment through natural language (for example, "query fabric prod lakehouse for y") and the server resolves a deterministic target.
 - [ ] **ROUTE-04**: Query responses include resolved target context (environment, workspace, endpoint type, database) so users can verify where queries ran.
@@ -22,9 +22,9 @@
 
 ### Authentication
 
-- [ ] **AUTH-01**: If `FABRIC_TENANT_ID`, `FABRIC_CLIENT_ID`, and `FABRIC_CLIENT_SECRET` are all set, Fabric auth uses client-secret flow.
-- [ ] **AUTH-02**: If any client-secret variables are missing, Fabric auth falls back to browser-capable default auth without blocking startup.
-- [ ] **AUTH-03**: Fabric auth behavior is single-tenant and uses one tenant context for all allowlisted Fabric workspaces.
+- [x] **AUTH-01**: If `FABRIC_TENANT_ID`, `FABRIC_CLIENT_ID`, and `FABRIC_CLIENT_SECRET` are all set, Fabric auth uses client-secret flow.
+- [x] **AUTH-02**: If any client-secret variables are missing, Fabric auth falls back to browser-capable default auth without blocking startup.
+- [x] **AUTH-03**: Fabric auth behavior is single-tenant and uses one tenant context for all allowlisted Fabric workspaces.
 
 ### Safety and Governance
 
@@ -35,7 +35,7 @@
 
 ### Configuration and Developer UX
 
-- [ ] **CONF-01**: Configuration supports both on-prem SQL settings and Fabric settings in one project config model.
+- [x] **CONF-01**: Configuration supports both on-prem SQL settings and Fabric settings in one project config model.
 - [ ] **CONF-02**: Tool descriptions remain mostly unchanged while implementation becomes environment-aware to minimize prompt/token overhead.
 - [ ] **CONF-03**: Documentation explains dual-environment setup, auth precedence, and examples for both explicit and natural-language targeting.
 
@@ -63,7 +63,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ROUTE-01 | Phase 1 | Pending |
+| ROUTE-01 | Phase 1 | Complete |
 | ROUTE-02 | Phase 2 | Pending |
 | ROUTE-03 | Phase 2 | Pending |
 | ROUTE-04 | Phase 2 | Pending |
@@ -72,14 +72,14 @@
 | FAB-03 | Phase 3 | Pending |
 | FAB-04 | Phase 3 | Pending |
 | FAB-05 | Phase 3 | Pending |
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
 | SAFE-01 | Phase 4 | Pending |
 | SAFE-02 | Phase 4 | Pending |
 | SAFE-03 | Phase 2 | Pending |
 | SAFE-04 | Phase 3 | Pending |
-| CONF-01 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 2 | Pending |
 | CONF-03 | Phase 4 | Pending |
 
