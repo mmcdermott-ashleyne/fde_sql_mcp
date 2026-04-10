@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** Users can query approved SQL data targets with one consistent, read-only MCP interface regardless of whether the data lives on-prem or in Fabric.
-**Current focus:** Phase 1 — Dual-Target Foundation and Auth
+**Current focus:** Phase 3 — Fabric SQL Endpoint Parity
 
 ## Current Position
 
