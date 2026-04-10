@@ -5,12 +5,29 @@ from typing import Any, Dict, List, Sequence
 
 from ..clients.sql import get_sql_connection
 from ..config import settings
+from . import targeting as TARGET
+
+
+def _ensure_onprem_execution(target_context: Dict[str, Any]) -> None:
+    if target_context.get("environment") == "onprem":
+        return
+
+    workspace = target_context.get("workspace")
+    endpoint_type = target_context.get("endpoint_type")
+    database = target_context.get("database")
+    raise ValueError(
+        "Fabric SQL query execution is not enabled in Phase 2. "
+        "Use onprem target for query execution until Phase 3 enables Fabric SQL endpoints. "
+        f"(workspace={workspace}, endpoint_type={endpoint_type}, database={database})"
+    )
 
 
 def _fetch_rows(
     database: str, query: str, params: Sequence[Any] | None = None
 ) -> List[Dict[str, Any]]:
     """Run the provided query against *database* and return rows as dicts."""
+    target_context = TARGET.get_query_target_impl()
+    _ensure_onprem_execution(target_context)
     conn = get_sql_connection(
         server=settings.sql_server,
         database=database,
@@ -124,6 +141,8 @@ def run_readonly_query_impl(
 ) -> Dict[str, Any]:
     """Execute a validated, read-only query with row limits enforced."""
     _validate_readonly_query(query)
+    target_context = TARGET.get_query_target_impl()
+    _ensure_onprem_execution(target_context)
     conn = get_sql_connection(
         server=settings.sql_server,
         database=database,
@@ -144,6 +163,7 @@ def run_readonly_query_impl(
         "row_count": len(rows),
         "row_limit": limit,
         "truncated": len(rows) >= limit,
+        "target_context": target_context,
     }
 
 
