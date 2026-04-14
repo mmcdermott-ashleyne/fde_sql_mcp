@@ -13,7 +13,7 @@ This roadmap delivers a slim, SQL-only dual-target MCP server where users keep o
 - [x] **Phase 1: Dual-Target Foundation and Auth** - Establish dual config and deterministic Fabric auth while preserving current on-prem behavior. (completed 2026-04-10)
 - [x] **Phase 2: Target Routing and Governance** - Add explicit and natural-language routing with strict allowlisted target resolution. (completed 2026-04-10)
 - [x] **Phase 3: Fabric SQL Endpoint Parity** - Enable allowed Warehouse and Lakehouse querying with the shared read-only MCP tool contract. (completed 2026-04-10)
-- [ ] **Phase 4: Safety Guardrails and Operator Docs** - Enforce cross-target read-only guardrails and document dual-environment usage.
+- [x] **Phase 4: Safety Guardrails and Operator Docs** - Enforce cross-target read-only guardrails and document dual-environment usage. (completed 2026-04-14)
 
 ## Phase Details
 
@@ -71,4 +71,4 @@ This roadmap delivers a slim, SQL-only dual-target MCP server where users keep o
 | 1. Dual-Target Foundation and Auth | 1/1 | Complete    | 2026-04-10 |
 | 2. Target Routing and Governance | 1/1 | Complete   | 2026-04-10 |
 | 3. Fabric SQL Endpoint Parity | 1/1 | Complete   | 2026-04-10 |
-| 4. Safety Guardrails and Operator Docs | 0/TBD | Not started | - |
+| 4. Safety Guardrails and Operator Docs | 1/1 | Complete   | 2026-04-14 |

@@ -28,8 +28,8 @@
 
 ### Safety and Governance
 
-- [ ] **SAFE-01**: Read-only SQL validation is enforced for both on-prem and Fabric execution paths.
-- [ ] **SAFE-02**: Query guardrails (max rows, max query characters, timeout) apply consistently across on-prem and Fabric targets.
+- [x] **SAFE-01**: Read-only SQL validation is enforced for both on-prem and Fabric execution paths.
+- [x] **SAFE-02**: Query guardrails (max rows, max query characters, timeout) apply consistently across on-prem and Fabric targets.
 - [x] **SAFE-03**: Queries are rejected when resolved Fabric workspace/database targets are outside the allowlist.
 - [x] **SAFE-04**: Scope remains SQL-only; no write operations or non-SQL Fabric operations are exposed by this MCP.
 
@@ -37,7 +37,7 @@
 
 - [x] **CONF-01**: Configuration supports both on-prem SQL settings and Fabric settings in one project config model.
 - [x] **CONF-02**: Tool descriptions remain mostly unchanged while implementation becomes environment-aware to minimize prompt/token overhead.
-- [ ] **CONF-03**: Documentation explains dual-environment setup, auth precedence, and examples for both explicit and natural-language targeting.
+- [x] **CONF-03**: Documentation explains dual-environment setup, auth precedence, and examples for both explicit and natural-language targeting.
 
 ## v2 Requirements
 
@@ -75,13 +75,13 @@
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
-| SAFE-01 | Phase 4 | Pending |
-| SAFE-02 | Phase 4 | Pending |
+| SAFE-01 | Phase 4 | Complete |
+| SAFE-02 | Phase 4 | Complete |
 | SAFE-03 | Phase 2 | Complete |
 | SAFE-04 | Phase 3 | Complete |
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 2 | Complete |
-| CONF-03 | Phase 4 | Pending |
+| CONF-03 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 19 total
