@@ -162,6 +162,79 @@ python -m fde_sql_mcp.server
 
 ---
 
+## Operator Guide (On-Prem + Fabric)
+
+### 1) Dual-Environment Setup Checklist
+
+- Configure on-prem SQL defaults (`sql_server`, `sql_database`) in `fde_sql_mcp.config.json`.
+- Configure Fabric allowlists:
+  - `fabric_allowed_workspaces`: only `fde_core_data_dev`, `fde_core_data_stg`, `fde_core_data_prod`
+  - `fabric_allowed_databases`: only `core_dw`, `core_lh`
+- Configure endpoint map entries for every workspace/endpoint pair you plan to query:
+  - `fabric_sql_endpoint_map.<workspace>.warehouse` -> `server` + `database=core_dw`
+  - `fabric_sql_endpoint_map.<workspace>.lakehouse` -> `server` + `database=core_lh`
+- Keep safety limits configured:
+  - `sql_enforce_readonly=true`
+  - `sql_max_rows`
+  - `sql_max_query_chars`
+  - `sql_query_timeout`
+
+### 2) Fabric Auth Precedence
+
+Auth mode is deterministic:
+1. `client_secret` mode when all three variables are set:
+   - `FABRIC_TENANT_ID`
+   - `FABRIC_CLIENT_ID`
+   - `FABRIC_CLIENT_SECRET`
+2. Otherwise use fallback mode from `FABRIC_AUTH_FALLBACK_MODE` (default `default_browser`).
+
+Use `get_auth_info()` to confirm the effective auth mode and configured input presence.
+
+### 3) Route Selection Examples
+
+Explicit target switching:
+
+```text
+set_query_target("onprem")
+set_query_target("fabric workspace=fde_core_data_dev endpoint=warehouse database=core_dw")
+set_query_target("fabric workspace=fde_core_data_prod endpoint=lakehouse database=core_lh")
+```
+
+Natural-language target selection:
+
+```text
+set_query_target("query fabric prod lakehouse")
+set_query_target("run this in fabric dev warehouse")
+```
+
+Verify active route before querying:
+
+```text
+get_query_target()
+```
+
+### 4) Safety Guardrail Behavior
+
+`run_readonly_query` guardrails are enforced consistently for both on-prem and Fabric targets:
+
+- Non-read-only SQL is rejected:
+  - Example: `DELETE FROM dbo.table_name`
+  - Expected error: only `SELECT`/`WITH` statements are allowed.
+- Oversized SQL is rejected:
+  - Example: query text length exceeds `sql_max_query_chars`
+  - Expected error: maximum read-only query length exceeded.
+- Row requests above configured max are clamped:
+  - Example: `max_rows=1000` with `sql_max_rows=200`
+  - Expected behavior: `row_limit` returns `200`, `truncated` reflects capped results.
+- Timeout applies to SQL execution cursors for query and metadata operations:
+  - Source: `sql_query_timeout`
+
+If a query fails, check whether the error is:
+- **Routing/governance** (workspace/database mismatch, missing endpoint mapping), or
+- **Safety validation** (read-only/size/row-limit guardrail).
+
+---
+
 ## Tools
 
 ### `get_auth_info()`
