@@ -387,3 +387,34 @@ def test_run_readonly_query_fails_when_fabric_mapping_missing(monkeypatch) -> No
         assert "endpoint mapping" in str(exc).lower()
     else:
         raise AssertionError("Expected ValueError for missing Fabric endpoint mapping")
+
+
+def test_run_readonly_query_rejects_write_keyword_for_fabric_target(
+    monkeypatch,
+) -> None:
+    settings = _build_settings(
+        monkeypatch,
+        local={
+            "fabric_allowed_workspaces": ["fde_core_data_dev"],
+            "fabric_allowed_databases": ["core_dw"],
+            "fabric_sql_endpoint_map": {
+                "fde_core_data_dev": {
+                    "warehouse": {
+                        "server": "dev-warehouse.sql.fabric",
+                        "database": "core_dw",
+                    }
+                }
+            },
+        },
+    )
+    _configure_targeting(monkeypatch, settings)
+    targeting.set_query_target_impl(
+        "fabric workspace=fde_core_data_dev endpoint=warehouse database=core_dw"
+    )
+
+    try:
+        databases.run_readonly_query_impl("core_dw", "DELETE FROM dbo.t")
+    except ValueError as exc:
+        assert "only select statements" in str(exc).lower()
+    else:
+        raise AssertionError("Expected ValueError for non-read-only query")
