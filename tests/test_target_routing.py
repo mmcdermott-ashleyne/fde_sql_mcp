@@ -270,6 +270,7 @@ def test_run_readonly_query_executes_with_fabric_warehouse_target(
             "database": "core_dw",
             "username": "svc-user",
             "password": "svc-pass",
+            "environment": "fabric",
         }
     ]
 

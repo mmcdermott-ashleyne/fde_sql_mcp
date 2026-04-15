@@ -129,7 +129,9 @@ Notes:
 - On-prem SQL uses Windows auth (`Trusted_Connection=yes`).
 - Fabric SQL endpoint auth is derived from `fabric_sql_endpoint_map`:
   - if `user` and `password` are provided, SQL auth is used;
-  - if omitted, Windows auth is attempted (useful for dev/test environments with delegated access).
+  - if omitted, Fabric auth mode is used:
+    - `client_secret` uses service principal credentials (`FABRIC_CLIENT_ID` + `FABRIC_CLIENT_SECRET`)
+    - `default_browser` / `browser` triggers ODBC interactive browser auth when no cached session exists.
 - `SQL_TRUST_SERVER_CERTIFICATE=true` matches your trusted cert requirement.
 - Fabric auth mode precedence is deterministic:
   - `client_secret` mode when `FABRIC_TENANT_ID`, `FABRIC_CLIENT_ID`, and `FABRIC_CLIENT_SECRET` are all configured.

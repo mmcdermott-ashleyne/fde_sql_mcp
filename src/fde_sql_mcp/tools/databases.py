@@ -115,12 +115,13 @@ def _fetch_rows(
     database: str, query: str, params: Sequence[Any] | None = None
 ) -> List[Dict[str, Any]]:
     """Run the provided query against *database* and return rows as dicts."""
-    _, connection_target = _resolve_execution_target(database)
+    target_context, connection_target = _resolve_execution_target(database)
     conn = get_sql_connection(
         server=str(connection_target["server"]),
         database=str(connection_target["database"]),
         username=connection_target["username"],
         password=connection_target["password"],
+        environment=str(target_context.get("environment") or "onprem"),
     )
     with conn.get_connection() as connection:
         cursor = connection.cursor()
@@ -241,6 +242,7 @@ def run_readonly_query_impl(
         database=str(connection_target["database"]),
         username=connection_target["username"],
         password=connection_target["password"],
+        environment=str(target_context.get("environment") or "onprem"),
     )
     limit = _normalize_max_rows(max_rows)
     with conn.get_connection() as connection:

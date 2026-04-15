@@ -7,6 +7,8 @@ import pyodbc
 
 from ..config import settings
 
+_FABRIC_BROWSER_AUTH_MODES = {"browser", "default_browser"}
+
 
 def _resolve_driver(preferred: Optional[str]) -> str:
     installed = {d.lower(): d for d in pyodbc.drivers()}
@@ -31,7 +33,7 @@ def _resolve_driver(preferred: Optional[str]) -> str:
 
 class SQLServerConnection:
     """
-    Minimal SQL Server connector using Windows authentication.
+    SQL connector supporting on-prem Windows auth and Fabric Entra auth modes.
     """
 
     def __init__(
@@ -41,12 +43,44 @@ class SQLServerConnection:
         driver: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
+        environment: str = "onprem",
     ) -> None:
         self.server = server
         self.database = database
         self.driver = driver or _resolve_driver(settings.sql_driver)
         self.username = username
         self.password = password
+        self.environment = (environment or "onprem").strip().lower()
+
+    def _build_fabric_auth_parts(self) -> list[str]:
+        if self.username and self.password:
+            return [f"Uid={self.username}", f"Pwd={self.password}"]
+
+        mode = (settings.fabric_auth_mode or "").strip().lower()
+        if mode == "client_secret":
+            client_id = (settings.fabric_client_id or "").strip()
+            client_secret = (settings.fabric_client_secret or "").strip()
+            if not client_id or not client_secret:
+                raise RuntimeError(
+                    "Fabric auth mode is `client_secret`, but client credentials "
+                    "are not fully configured."
+                )
+            return [
+                "Authentication=ActiveDirectoryServicePrincipal",
+                f"Uid={client_id}",
+                f"Pwd={client_secret}",
+            ]
+
+        if mode in _FABRIC_BROWSER_AUTH_MODES:
+            # Let the ODBC driver invoke interactive browser/device auth
+            # when no cached Fabric token/session is available.
+            return ["Authentication=ActiveDirectoryInteractive"]
+
+        raise RuntimeError(
+            "Unsupported Fabric auth mode "
+            f"`{settings.fabric_auth_mode}`. "
+            "Use `default_browser`, `browser`, or configure client-secret auth."
+        )
 
     def _build_conn_str(self) -> str:
         server = self.server
@@ -66,7 +100,9 @@ class SQLServerConnection:
             f"Connection Timeout={settings.sql_connection_timeout}",
             "Application Name=FDE SQL MCP",
         ]
-        if self.username and self.password:
+        if self.environment == "fabric":
+            parts.extend(self._build_fabric_auth_parts())
+        elif self.username and self.password:
             parts.append(f"Uid={self.username}")
             parts.append(f"Pwd={self.password}")
         else:
@@ -97,10 +133,12 @@ def get_sql_connection(
     database: str,
     username: str | None = None,
     password: str | None = None,
+    environment: str = "onprem",
 ) -> SQLServerConnection:
     return SQLServerConnection(
         server=server,
         database=database,
         username=username,
         password=password,
+        environment=environment,
     )
